@@ -4,9 +4,12 @@ import Prelude
 import Webb.State.Prelude
 
 import Control.Monad.State (StateT)
+import Control.Monad.State as State
 import Data.Array as Array
+import Data.Maybe (Maybe(..))
+import Data.Set as Set
 import Effect.Aff (Aff)
-import Effect.Aff.Class (liftAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Node.FS.Aff as File
 import Node.FS.Stats as Stat
@@ -28,6 +31,10 @@ type Path = String
 
 type Prog = StateT State Aff
 
+eval :: forall m a. MonadAff m => State -> Prog a -> m a
+eval state prog = liftAff do 
+  State.evalStateT prog state
+
 -- Initialize the stack with the current working directory
 init :: Prog Unit
 init = do
@@ -35,14 +42,19 @@ init = do
   cwd <- Process.cwd # liftEffect
   Stack.push (Abs.new [] cwd) :> this.stack
   
+isFirst :: Prog Boolean
+isFirst = do
+  this <- mread
+  size <- Stack.size <: this.stack
+  pure $ size <= 1
+  
 -- Push the next directory onto the stack, and navigate there.
 -- Allows relative paths to be used.
-push :: String -> Prog Unit
+push :: AbsolutePath -> Prog Unit
 push dir = do
   this <- mread
-  let path = Abs.new [] dir
-  chdir path
-  Stack.push path :> this.stack
+  chdir dir
+  Stack.push dir :> this.stack
 
 -- Pop to the previous working directory.
 pop :: Prog Unit
@@ -52,7 +64,7 @@ pop = do
   when (size > 1) do
     Stack.pop :> this.stack
     next <- current
-    chdir $ Abs.new [] next
+    chdir next
 
 -- Pop to the first working directory.
 popToFirst :: Prog Unit
@@ -62,15 +74,14 @@ popToFirst = do
   when (size > 1) do
     Stack.popToFirst :> this.stack
     next <- current
-    chdir $ Abs.new [] next
+    chdir next
     
 -- Replace the existing current directory and navigate to it.
-replace :: String -> Prog Unit
+replace :: AbsolutePath -> Prog Unit
 replace dir = do
   this <- mread
-  let path = Abs.new [] dir
-  chdir path
-  Stack.replace path :> this.stack
+  chdir dir
+  Stack.replace dir :> this.stack
   
 chdir :: AbsolutePath -> Prog Unit
 chdir path = do
@@ -78,37 +89,57 @@ chdir path = do
   Process.chdir str # liftEffect
   
 -- What is the current directory, according to our stack?
-current :: Prog String
+current :: Prog AbsolutePath
 current = do
   this <- mread
   mpath <- Stack.peek <: this.stack
   path <- forceMaybe' "Expected a stack top to exist" mpath
-  pure $ Abs.unwrap path
+  pure $ path
+  
+-- Get the parent path, if it exists.
+currentParent :: Prog (Maybe AbsolutePath)
+currentParent = do 
+  path <- current
+  let mparent = Abs.parent path
+  pure mparent
   
 -- Publishes all the paths as absolute paths.
-currentPaths :: Prog (Array String)
+currentPaths :: Prog (Array AbsolutePath)
 currentPaths = do
   path <- current
-  paths <- File.readdir path # liftAff
-  pure $ paths <#> Abs.new [] >>> Abs.unwrap
+  paths <- File.readdir (Abs.unwrap path) # liftAff
+  pure $ paths <#> Abs.new []
 
 -- What are the files in the current directory?
 -- If we have them, we can operate on them.
-files :: Prog (Array String)
+files :: Prog (Array AbsolutePath)
 files = do
   paths <- currentPaths
-  let abs = paths <#> Abs.new []
-  arr <- Array.filterA isFile abs
-  pure $ arr <#> Abs.unwrap
+  arr <- Array.filterA isFile paths
+  pure $ arr 
+  
+-- Do we have the given file name?
+containsFileName :: String -> Prog Boolean
+containsFileName name = do
+  paths <- files
+  let names = Abs.basename <$> paths
+  pure $ Set.member name $ Set.fromFoldable names
 
 -- What are the sub-directories in the current directory?
--- If we have them, we can operate on them.
-dirs :: Prog (Array String)
+-- If we have them, we can operate on them. But these are all _absolute_ paths.
+-- We can navigate down into them.
+dirs :: Prog (Array AbsolutePath)
 dirs = do 
   paths <- currentPaths
-  let abs = paths <#> Abs.new []
-  arr <- Array.filterA isDirectory abs
-  pure $ arr <#> Abs.unwrap
+  arr <- Array.filterA isDirectory paths
+  pure $ arr
+  
+-- Do we have the given directory name?
+containsDirName :: String -> Prog Boolean
+containsDirName name = do
+  paths <- dirs
+  let names = Abs.basename <$> paths
+  pure $ Set.member name $ Set.fromFoldable names
   
 -- Is the given path a _file_? This will not change based on the cwd.
 isFile :: AbsolutePath -> Prog Boolean

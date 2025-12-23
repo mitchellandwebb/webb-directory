@@ -2,6 +2,7 @@ module Webb.Directory.Data.Absolute where
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
 import Node.Path as Path
 import Webb.Stateful (localEffect)
 
@@ -24,3 +25,29 @@ new dir path = localEffect do
 unwrap :: AbsolutePath -> Path
 unwrap (AP str) = str
 
+basename :: AbsolutePath -> String
+basename (AP str) = Path.basename str
+
+-- Get the parent path of this path, if it exists
+parent :: AbsolutePath -> Maybe AbsolutePath
+parent this@(AP str) = let 
+  p = new [str] ".."
+  in if p == this then
+    Nothing
+  else 
+    Just p
+
+-- Treat the subsequent string as an attempt to _extend_ the path, allowing
+-- ".." if the desire is to go upward, or "/child" or "child" if the desire is to go
+-- downward.
+child :: String -> AbsolutePath -> AbsolutePath
+child extension (AP str) = let
+  normal = Path.concat $ [ str, extension ]
+  c = new [] normal
+  in c
+
+childFlipped :: AbsolutePath -> String -> AbsolutePath
+childFlipped = flip child
+
+-- path + "goodbye" + "../hello"
+infixl 5 childFlipped as +
