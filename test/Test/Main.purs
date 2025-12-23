@@ -3,10 +3,9 @@ module Test.Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Class.Console (log)
+import Effect.Aff (launchAff_)
+import Webb.Test.Prelude (runSpecs)
 
 main :: Effect Unit
-main = do
-  log "🍕"
-  log "You should add some tests."
+main = do launchAff_ $ runSpecs ".*Spec"
 
