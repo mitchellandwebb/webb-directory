@@ -36,6 +36,7 @@ init = do
   Stack.push (Abs.new [] cwd) :> this.stack
   
 -- Push the next directory onto the stack, and navigate there.
+-- Allows relative paths to be used.
 push :: String -> Prog Unit
 push dir = do
   this <- mread
@@ -84,6 +85,7 @@ current = do
   path <- forceMaybe' "Expected a stack top to exist" mpath
   pure $ Abs.unwrap path
   
+-- Publishes all the paths as absolute paths.
 currentPaths :: Prog (Array String)
 currentPaths = do
   path <- current
@@ -95,21 +97,27 @@ currentPaths = do
 files :: Prog (Array String)
 files = do
   paths <- currentPaths
-  Array.filterA isFile paths
+  let abs = paths <#> Abs.new []
+  arr <- Array.filterA isFile abs
+  pure $ arr <#> Abs.unwrap
 
 -- What are the sub-directories in the current directory?
 -- If we have them, we can operate on them.
 dirs :: Prog (Array String)
 dirs = do 
   paths <- currentPaths
-  Array.filterA isDirectory paths
+  let abs = paths <#> Abs.new []
+  arr <- Array.filterA isDirectory abs
+  pure $ arr <#> Abs.unwrap
   
-isFile :: String -> Prog Boolean
+-- Is the given path a _file_? This will not change based on the cwd.
+isFile :: AbsolutePath -> Prog Boolean
 isFile path = do 
-  stat <- File.stat path # liftAff
+  stat <- File.stat (Abs.unwrap path) # liftAff
   pure $ Stat.isFile stat
 
-isDirectory :: String -> Prog Boolean
+-- Is the given path a _directory_? This will not change based on the cwd.
+isDirectory :: AbsolutePath -> Prog Boolean
 isDirectory path = do
-  stat <- File.stat path # liftAff
+  stat <- File.stat (Abs.unwrap path) # liftAff
   pure $ Stat.isDirectory stat
