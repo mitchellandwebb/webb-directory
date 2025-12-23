@@ -18,7 +18,7 @@ type AbsPath = AbsolutePath
 -- Resolve a path. An empty array resolves to the root directory "/"
 -- A simple name without any preceding directory indicator resolves relative to
 -- to the current directory; so ["hello"] becomes ["./hello"]. To get "/hello", use 
--- ["/", "hello"]
+-- `new ["/", "hello"]` or `new [] "/hello"`
 new :: Array Path -> Path -> AbsolutePath
 new dir path = localEffect do 
   str <- Path.resolve dir path
