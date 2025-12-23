@@ -56,3 +56,6 @@ childFlipped = flip child
 
 -- path ++ "goodbye" ++ "../hello"
 infixl 5 childFlipped as ++
+
+asString :: AbsolutePath -> String
+asString = unwrap
