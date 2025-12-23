@@ -49,3 +49,9 @@ contains :: AbsolutePath -> Stack -> Boolean
 contains path stack = let 
   array = unwrap stack
   in isJust $ Array.find (_ == path) array
+
+size :: Stack -> Int
+size = unwrap >>> Array.length
+
+isEmpty :: Stack -> Boolean
+isEmpty = size >>> (_ <= 0)
