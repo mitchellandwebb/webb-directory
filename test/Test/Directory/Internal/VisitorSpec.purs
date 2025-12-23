@@ -7,7 +7,6 @@ import Effect.Class (liftEffect)
 import Node.Path as Path
 import Node.Process as Process
 import Test.Spec (around_)
-import Test.Spec.Assertions (expectError)
 import Webb.Directory.Data.Absolute as Abs
 import Webb.Directory.Data.Stack as Stack
 import Webb.Directory.Internal.Visitor as Vis
