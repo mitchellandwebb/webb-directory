@@ -41,8 +41,18 @@ init path = do
 isFirst :: Prog Boolean
 isFirst = do
   this <- mread
-  size <- Stack.size <: this.stack
-  pure $ size <= 1
+  size' <- Stack.size <: this.stack
+  pure $ size' <= 1
+
+size :: Prog Int
+size = do 
+  this <- mread
+  Stack.size <: this.stack
+
+toString :: Prog String
+toString = do 
+  this <- mread
+  pure $ show this.stack
   
 -- Push the next directory onto the stack, and navigate there.
 -- Allows relative paths to be used.
@@ -55,16 +65,16 @@ push dir = do
 pop :: Prog Unit
 pop = do
   this <- mread
-  size <- Stack.size <: this.stack
-  when (size > 1) do
+  size' <- Stack.size <: this.stack
+  when (size' > 1) do
     Stack.pop :> this.stack
 
 -- Pop to the first working directory.
 popToFirst :: Prog Unit
 popToFirst = do
   this <- mread
-  size <- Stack.size <: this.stack
-  when (size > 1) do
+  size' <- Stack.size <: this.stack
+  when (size' > 1) do
     Stack.popToFirst :> this.stack
     
 -- Replace the existing current directory and navigate to it.
