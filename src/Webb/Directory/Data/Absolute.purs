@@ -13,6 +13,8 @@ derive newtype instance Eq AbsolutePath
 derive newtype instance Ord AbsolutePath
 derive newtype instance Show AbsolutePath
 
+type AbsPath = AbsolutePath
+
 -- Resolve a path. An empty array resolves to the root directory "/"
 -- A simple name without any preceding directory indicator resolves relative to
 -- to the current directory; so ["hello"] becomes ["./hello"]. To get "/hello", use 
@@ -21,6 +23,9 @@ new :: Array Path -> Path -> AbsolutePath
 new dir path = localEffect do 
   str <- Path.resolve dir path
   pure $ AP str
+
+newAbs :: Array Path -> Path -> AbsolutePath
+newAbs = new
   
 unwrap :: AbsolutePath -> Path
 unwrap (AP str) = str

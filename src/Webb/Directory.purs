@@ -1,17 +1,16 @@
-module Webb.Directory.Directory where
+module Webb.Directory where
 
 import Prelude
 import Webb.State.Prelude
 
 import Data.Maybe (Maybe)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
-import Node.Process (cwd)
 import Webb.Directory.Data.Absolute (AbsolutePath)
-import Webb.Directory.Data.Absolute as Abs
 import Webb.Directory.Data.Stack (Stack)
 import Webb.Directory.Data.Stack as Stack
 import Webb.Directory.Internal.Directory as Dir
+import Webb.Directory.Visitor (Visitor)
+import Webb.Directory.Visitor as Visitor
 
 
 {- Represents a directory with a stack. This makes it possible to navigate from working directory to working directory, performing operations. The downside of this is that the 
@@ -28,9 +27,15 @@ derive newtype instance Show Directory
 newDirectory :: forall m. MonadAff m => m Directory
 newDirectory = do
   stack <- newShowRef Stack.emptyStack
-  firstDir <- cwd # liftEffect
-  Stack.push (Abs.new [] firstDir) :> stack
-  pure $ D { stack }
+  let dir = D { stack }
+  eval dir Dir.init 
+  pure dir
+  
+-- Create the visitor from the top level of the directory.
+getVisitor :: forall m. MonadAff m => Directory -> m Visitor
+getVisitor dir = do
+  current <- currentPath dir
+  Visitor.newVisitor current
   
 eval :: forall m a. MonadAff m => Directory -> Dir.Prog a -> m a
 eval (D s) prog = Dir.eval s prog

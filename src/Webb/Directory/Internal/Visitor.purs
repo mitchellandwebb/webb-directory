@@ -1,4 +1,4 @@
-module Webb.Directory.Internal.Directory where
+module Webb.Directory.Internal.Visitor where
 
 import Prelude
 import Webb.State.Prelude
@@ -10,10 +10,8 @@ import Data.Maybe (Maybe)
 import Data.Set as Set
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
-import Effect.Class (liftEffect)
 import Node.FS.Aff as File
 import Node.FS.Stats as Stat
-import Node.Process as Process
 import Webb.Directory.Data.Absolute (AbsolutePath)
 import Webb.Directory.Data.Absolute as Abs
 import Webb.Directory.Data.Stack (Stack)
@@ -21,9 +19,8 @@ import Webb.Directory.Data.Stack as Stack
 import Webb.Monad.Prelude (forceMaybe')
 
 
-{- Define internal directory structures in terms of monads. We hide these from
-  the end user. These describe the operations that can be performed on the stack,
-  in concert with effects on the file system itself.
+{- Define internal directory stack. However, init proceeds differently, and we 
+  NEVER rely on the CWD for any operations.
 -}
 
 type State = { stack :: ShowRef Stack }
@@ -36,11 +33,10 @@ eval state prog = liftAff do
   State.evalStateT prog state
 
 -- Initialize the stack with the current working directory
-init :: Prog Unit
-init = do
+init :: AbsolutePath -> Prog Unit
+init path = do
   this <- mread
-  cwd <- Process.cwd # liftEffect
-  Stack.push (Abs.new [] cwd) :> this.stack
+  Stack.push path :> this.stack
   
 isFirst :: Prog Boolean
 isFirst = do
@@ -53,7 +49,6 @@ isFirst = do
 push :: AbsolutePath -> Prog Unit
 push dir = do
   this <- mread
-  chdir dir
   Stack.push dir :> this.stack
 
 -- Pop to the previous working directory.
@@ -63,8 +58,6 @@ pop = do
   size <- Stack.size <: this.stack
   when (size > 1) do
     Stack.pop :> this.stack
-    next <- current
-    chdir next
 
 -- Pop to the first working directory.
 popToFirst :: Prog Unit
@@ -73,20 +66,12 @@ popToFirst = do
   size <- Stack.size <: this.stack
   when (size > 1) do
     Stack.popToFirst :> this.stack
-    next <- current
-    chdir next
     
 -- Replace the existing current directory and navigate to it.
 replace :: AbsolutePath -> Prog Unit
 replace dir = do
   this <- mread
-  chdir dir
   Stack.replace dir :> this.stack
-  
-chdir :: AbsolutePath -> Prog Unit
-chdir path = do
-  let str = Abs.unwrap path
-  Process.chdir str # liftEffect
   
 -- What is the current directory, according to our stack?
 current :: Prog AbsolutePath
