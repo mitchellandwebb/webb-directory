@@ -54,5 +54,5 @@ child extension (AP str) = let
 childFlipped :: AbsolutePath -> String -> AbsolutePath
 childFlipped = flip child
 
--- path + "goodbye" + "../hello"
-infixl 5 childFlipped as +
+-- path ++ "goodbye" ++ "../hello"
+infixl 5 childFlipped as ++

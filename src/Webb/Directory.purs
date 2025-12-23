@@ -58,6 +58,9 @@ containsFileName dir name = eval dir (Dir.containsFileName name)
 containsDirName :: forall m. MonadAff m => Directory -> String -> m Boolean
 containsDirName dir name = eval dir (Dir.containsDirName name)
 
+makePath :: forall m. MonadAff m => Directory -> String -> m AbsolutePath
+makePath dir name = eval dir (Dir.makeName name)
+
 push :: forall m. MonadAff m => Directory -> AbsolutePath -> m Unit
 push dir path = eval dir (Dir.push path)
 

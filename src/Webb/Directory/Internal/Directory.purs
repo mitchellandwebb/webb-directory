@@ -14,7 +14,7 @@ import Effect.Class (liftEffect)
 import Node.FS.Aff as File
 import Node.FS.Stats as Stat
 import Node.Process as Process
-import Webb.Directory.Data.Absolute (AbsolutePath)
+import Webb.Directory.Data.Absolute (AbsolutePath, (++))
 import Webb.Directory.Data.Absolute as Abs
 import Webb.Directory.Data.Stack (Stack)
 import Webb.Directory.Data.Stack as Stack
@@ -140,6 +140,12 @@ containsDirName name = do
   paths <- dirs
   let names = Abs.basename <$> paths
   pure $ Set.member name $ Set.fromFoldable names
+  
+-- Take the current directory and append the string. Useful for creating a path for a file -- -- if we detect a "spago.yaml", we can obtain its path with ease.
+makeName :: String -> Prog AbsolutePath
+makeName string = do
+  path <- current
+  pure $ path ++ string
   
 -- Is the given path a _file_? This will not change based on the cwd.
 isFile :: AbsolutePath -> Prog Boolean
