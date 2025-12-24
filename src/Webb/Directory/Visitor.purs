@@ -3,6 +3,7 @@ module Webb.Directory.Visitor where
 import Prelude
 import Webb.State.Prelude
 
+import Data.Array as Array
 import Data.Maybe (Maybe)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -45,6 +46,10 @@ currentPath dir = eval dir Vis.current
 
 parentPath :: forall m. MonadAff m => Visitor -> m (Maybe AbsolutePath)
 parentPath dir = eval dir Vis.currentParent
+
+childCount :: forall m. MonadAff m => Visitor -> m Int
+childCount vis = eval vis do
+  Array.length <$> Vis.currentPaths
 
 files :: forall m. MonadAff m => Visitor -> m (Array AbsolutePath)
 files dir = eval dir Vis.files

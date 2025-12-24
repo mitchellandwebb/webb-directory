@@ -103,7 +103,7 @@ currentPaths :: Prog (Array AbsolutePath)
 currentPaths = do
   path <- current
   paths <- File.readdir (Abs.unwrap path) # liftAff
-  pure $ paths <#> Abs.new []
+  pure $ paths <#> flip Abs.child path
 
 -- What are the files in the current directory?
 -- If we have them, we can operate on them.

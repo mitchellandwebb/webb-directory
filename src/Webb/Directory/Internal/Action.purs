@@ -33,6 +33,7 @@ removeDirChildren path = do
     dirs <- Visitor.dirs visitor
     for_ dirs \dir -> do forceRemove dir
     for_ files \file -> do forceRemove file
+    pure unit
           
 -- Remove the item. Return Boolean indicating whether removal succeeded without
 -- error.
