@@ -3,17 +3,15 @@ module Webb.Directory.Action where
 import Prelude
 
 import Effect.Aff.Class (class MonadAff, liftAff)
-import Webb.Directory.Data.Absolute (AbsolutePath)
 import Webb.Directory.Data.Absolute as Abs
 import Webb.Directory.Internal.Action as Prog
 
 {- Interesting actions and queries to run within the directory. -}
 
-newtype Action = A
-  { path :: AbsolutePath }
+newtype Action = A {}
   
-newAction :: forall m. MonadAff m => Abs.AbsPath -> m Action
-newAction path = pure $ A { path }
+newAction :: forall m. MonadAff m => m Action
+newAction = pure $ A { }
 
 eval :: forall m a. MonadAff m => Action -> Prog.Prog a -> m a
 eval _action prog = liftAff $ Prog.eval { } prog
