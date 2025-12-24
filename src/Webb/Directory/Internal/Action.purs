@@ -49,7 +49,7 @@ forceRemove path = do
       pure false 
     )
   ) (do 
-    pure false
+    pure true -- Didn't exist, so the removal succeeded by default.
   )
 
 -- Remove the directory itself at the given path, but only if it exists.
