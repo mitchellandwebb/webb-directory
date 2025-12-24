@@ -30,6 +30,15 @@ removeDirChildren action path = eval action $ Prog.removeDirChildren path
 
 forceRemove :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Boolean
 forceRemove action path = eval action $ Prog.forceRemove path
+
+makeDir :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Unit
+makeDir action path = eval action $ Prog.makeDir path
+
+mkDir :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Unit
+mkDir action path = eval action $ Prog.mkDir path
+
+exists :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Boolean
+exists action path = eval action $ Prog.exists path
   
 -- Does the directory exist at the absolute path?
 existsDir :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Boolean

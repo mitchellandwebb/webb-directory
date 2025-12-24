@@ -76,6 +76,9 @@ makeDir path = do
     liftAff do
       FS.mkdir' dirPath { recursive: true, mode: permsReadWrite }
 
+mkDir :: AbsolutePath -> Prog Unit
+mkDir = makeDir
+
 -- Does the path exist in some form to be a target of 'stat'?
 exists :: AbsPath -> Prog Boolean
 exists path = do 
