@@ -25,6 +25,10 @@ removeDir action path = eval action $ Prog.removeDir path
 resetDir :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Unit
 resetDir action path = eval action $ Prog.resetDir path
 
+-- Ensure the directory exists, and create it if it doesn't.
+ensureDir :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Unit
+ensureDir action path = eval action $ Prog.ensureDir path
+
 removeDirChildren :: forall m. MonadAff m => Action -> Abs.AbsPath -> m Unit
 removeDirChildren action path = eval action $ Prog.removeDirChildren path
 

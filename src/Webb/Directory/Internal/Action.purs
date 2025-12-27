@@ -68,6 +68,11 @@ resetDir :: AbsolutePath -> Prog Unit
 resetDir path = do
   removeDir path
   makeDir path
+
+ensureDir :: AbsolutePath -> Prog Unit
+ensureDir path = do
+  unlessM (existsDir path) do
+    makeDir path
     
 -- Make directory at the given path, recursively.
 makeDir :: AbsolutePath -> Prog Unit
