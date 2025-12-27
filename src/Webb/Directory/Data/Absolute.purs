@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Node.Path as Path
+import Node.Process as Process
 import Webb.Stateful (localEffect)
 
 type Path = String
@@ -29,6 +30,11 @@ newAbs = new
   
 unwrap :: AbsolutePath -> Path
 unwrap (AP str) = str
+
+cwd :: Unit -> AbsolutePath
+cwd _ = localEffect do
+  path <- Process.cwd
+  pure $ new [] path
 
 basename :: AbsolutePath -> String
 basename (AP str) = Path.basename str
