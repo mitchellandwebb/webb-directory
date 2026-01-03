@@ -53,7 +53,20 @@ spec = describe "Absolute path tests" do
       path = Abs.new [] "/a"
       child = path ++ ".."
     pathEquals child "/" 
+    
+  it "understands depth" do 
+    let root = Abs.new [] "/"
+        path = Abs.new [] "/a"
+        path' = Abs.new [] "/a/"
+        child = path ++ "babe"
+    depthEquals root 0
+    depthEquals path 1
+    depthEquals path' 1
+    depthEquals child 2
 
   where
   pathEquals path string = do
     Abs.unwrap path === string
+    
+  depthEquals path n = do 
+    Abs.depth path === n

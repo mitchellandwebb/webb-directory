@@ -13,12 +13,12 @@ package:
     - ordered-collections: ">=3.2.0 <4.0.0"
     - prelude: ">=6.0.2 <7.0.0"
     - transformers: ">=6.1.0 <7.0.0"
-    - webb-monad: ">=0.0.2 <0.0.3"
-    - webb-refer: ">=0.0.2 <0.0.4"
-    - webb-stateful: ">=0.0.2 <0.0.3"
+    - webb-monad: ">=0.0.2 <0.1.0"
+    - webb-refer: ">=0.0.2 <0.1.0"
+    - webb-stateful: ">=0.0.2 <0.1.0"
 
   publish:
-    version: 0.0.4
+    version: 0.0.5
     license: BSD-3-Clause
     location:
       githubOwner: mitchellandwebb

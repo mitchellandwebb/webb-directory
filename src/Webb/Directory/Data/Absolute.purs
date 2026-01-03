@@ -2,7 +2,9 @@ module Webb.Directory.Data.Absolute where
 
 import Prelude
 
+import Data.Array as Array
 import Data.Maybe (Maybe(..))
+import Data.String as String
 import Node.Path as Path
 import Node.Process as Process
 import Webb.Stateful (localEffect)
@@ -65,3 +67,13 @@ infixl 5 childFlipped as ++
 
 asString :: AbsolutePath -> String
 asString = unwrap
+
+-- How deep is the path in the file system? We can only determine this 
+-- by separating the string path's segments, and counting. We make no distinction
+-- here between files and directories -- it is up to the caller to tell the 
+-- difference.
+depth :: AbsolutePath -> Int
+depth (AP str) = let 
+  segments = String.split (String.Pattern Path.sep) str
+  filtered = Array.filter (_ /= "") segments
+  in Array.length filtered
