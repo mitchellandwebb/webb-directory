@@ -30,8 +30,8 @@ new dir path = localEffect do
 newAbs :: Array Path -> Path -> AbsolutePath
 newAbs = new
 
-modify :: AbsolutePath -> (String -> String) -> AbsolutePath
-modify (AP str) f = AP (f str)
+modify :: (String -> String) -> AbsolutePath -> AbsolutePath
+modify f (AP str) = AP (f str)
   
 unwrap :: AbsolutePath -> Path
 unwrap (AP str) = str
